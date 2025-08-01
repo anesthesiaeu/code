@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>code: s'agapo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: black;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      color: white;
+      text-align: center;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    * {
+      box-sizing: inherit;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    #quote, #message, #inputBox, #buttonPad, #envelope, #finalMessage, #clueBox {
+      position: relative;
+      z-index: 2;
+      margin-top: 2vh;
+      padding: 0 5vw;
+    }
+    #quote {
+      font-size: 6vw;
+      cursor: pointer;
+    }
+    @media (min-width: 600px) {
+      #quote {
+        font-size: 2rem;
+      }
+    }
+    #codeInput {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      width: 80%;
+      max-width: 300px;
+      background-color: black;
+      color: white;             
+    }
+    #buttonPad {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    #buttonPad button {
+      font-size: 1.2rem;
+      margin: 5px;
+      padding: 0.6rem 1rem;
+      border-radius: 5px;
+      border: none;
+      background: white;
+      color: black;
+      cursor: pointer;
+    }
+    #envelope, #letterBox, #finalMessage, #clueBox {
+      display: none;
+    }
+    #envelope {
+      font-size: 3rem;
+      cursor: pointer;
+    }
+    #letterBox {
+      font-family: 'Poppins', system-ui, sans-serif;
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+      z-index: 3;
+      position: relative;
+      max-height: 60vh;
+      overflow-y: auto;
+      text-align: justify;
+      line-height: 1.6;
+    }
+    #letterBox button {
+      display: block; 
+      margin: 1rem auto 0; 
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #finalMessage {
+      font-size: 2rem;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    #clueBox button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="space"></canvas>
+  <div id="quote" onclick="revealInput()">“Trace the ones that feel too much, the ones that sparked with every touch.”</div>
+  <div id="inputBox" style="display:none">
+    <div id="questionText">“I’ve been giving you stars, but some carry hearts. Count how many beats I meant, from the night each one starts.”</div>
+    <input type="text" id="codeInput" placeholder="Enter code" />
+    <div id="buttonPad"></div>
+  </div>
+  <div id="message"></div>
+  <div id="clueBox">
+    <p>ILOVEYOUSOMUCH, MY LOVE!</p>
+    <button onclick="continueToLove()"><3</button>
+  </div>
+  <div id="envelope">💌</div>
+  <div id="letterBox">
+    <p>Do you ever look up at the stars and wonder if they change when we’re not looking?
+
+Mon amour, 
+
+Ten months. Somehow it feels both like a long time and like no time at all. Our love has changed, and I think it has grown up with us. It feels mature now. We don’t have to talk all the time, and that’s okay. It feels nice to know that even in the silence, I know you’re there. My person. My only one.
+
+I’ve learned to understand the way you love, and I’ve learned to love differently too. You let me talk about everything, even when I can so tell you’re not in the mood, and I love you for it. You make me feel every emotion on the menu: happy, giddy, annoyed, sappy. Thanks to that sass.
+
+College will only get busier from here. Life is unpredictable, and we’ll keep changing, but I know we’ll get through it together. We’ll make time for each other, not because we have to, but because we want to. I’ll always be here for you. I was your number one fan before, and I still am, but now I’m also your number one supporter. I want to see you win, shine, and become everything you dream of, and I want to grow alongside you.
+
+Thank you for loving this very chaotic girl who overthinks, rants, and feels everything all at once. Thank you for understanding me, even though there are times when I can barely understand myself. And thank you for letting me love the man who is kind and mature, sometimes goofy, sometimes funny, sometimes annoyed, sometimes bored—but always pogi, always handsome, and always my intelligent lalove. 
+
+I love you, infinitely, honestly, and in all the ordinary and extraordinary ways I know how. I chose you yesterday, and I’ll choose you today, tomorrow, and every version of forever we get. And if the stars ever move, I know my heart will still point to you.
+
+Love,
+Angellie.</p>
+    <button onclick="closeLetter()">ILOVEYOU</button>
+  </div>
+  <div id="finalMessage"></div>
+
+  <script>
+    const canvas = document.getElementById('space');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let stars = [], comet = null;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < 1000; i++) {
+        stars.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'white';
+      stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function launchComet() {
+      comet = { x: -100, y: Math.random() * height / 2, vx: 5 + Math.random() * 3, vy: 1, length: 80 };
+    }
+
+    function drawComet() {
+      if (!comet) return;
+      ctx.beginPath();
+      let grd = ctx.createLinearGradient(comet.x, comet.y, comet.x - comet.length, comet.y - comet.length);
+      grd.addColorStop(0, 'white');
+      grd.addColorStop(1, 'transparent');
+      ctx.strokeStyle = grd;
+      ctx.lineWidth = 3;
+      ctx.moveTo(comet.x, comet.y);
+      ctx.lineTo(comet.x - comet.length, comet.y - comet.length);
+      ctx.stroke();
+
+      comet.x += comet.vx;
+      comet.y += comet.vy;
+      if (comet.x > width + 100) comet = null;
+    }
+
+    function animate() {
+      drawStars();
+      drawComet();
+      requestAnimationFrame(animate);
+    }
+
+    let step = 1;
+    let currentCode = '72391465810';
+    let wrongQuotes = [
+      '“Some maps were marked, some skies were bare. But count the ones where I laid it bare.”',
+      '“Not every night had something new, but some had heartbeats, more than few.”'
+    ];
+
+    function revealInput() {
+      document.getElementById('quote').style.display = 'none';
+      document.getElementById('inputBox').style.display = 'block';
+      renderButtons(currentCode);
+    }
+
+    function renderButtons(code) {
+      let pad = document.getElementById('buttonPad');
+      pad.innerHTML = '';
+      let chars;
+      if (isNaN(code)) {
+        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      } else {
+        chars = ['0','1','2','3','4','5','6','7','8','9'];
+      }
+      chars.forEach(c => {
+        let btn = document.createElement('button');
+        btn.textContent = c;
+        btn.onclick = () => document.getElementById('codeInput').value += c;
+        pad.appendChild(btn);
+      });
+      let enter = document.createElement('button');
+      enter.textContent = 'Enter';
+      enter.onclick = checkCode;
+      pad.appendChild(enter);
+    }
+
+    function checkCode() {
+      let input = document.getElementById('codeInput').value;
+      if (input === currentCode) {
+        nextStep();
+      } else {
+        document.getElementById('message').textContent = wrongQuotes[Math.floor(Math.random() * wrongQuotes.length)];
+        document.getElementById('codeInput').value = '';
+      }
+    }
+
+    function nextStep() {
+      step++;
+      document.getElementById('codeInput').value = '';
+      document.getElementById('message').textContent = '';
+      if (step === 2) {
+        currentCode = '2945';
+        document.getElementById('questionText').textContent = '“Skip one, keep one, the gentle flow. It’s not the odd ones that you know.” “Look at the second, then fourth and so on. The hidden code lives where the odd ones are gone.” “Do the stars get even?”';
+        renderButtons(currentCode);
+      } else if (step === 3) {
+        document.getElementById('inputBox').style.display = 'none';
+        document.getElementById('message').style.display = 'none';
+        document.getElementById('clueBox').style.display = 'block';
+      } else if (step === 4) {
+        currentCode = 'LOVE';
+        document.getElementById('clueBox').style.display = 'none';
+        document.getElementById('inputBox').style.display = 'block';
+        document.getElementById('questionText').textContent = '“Spell what you feel." There are four letters, but only one word for what we feel.';
+        renderButtons(currentCode);
+      } else if (step === 5) {
+        document.getElementById('inputBox').style.display = 'none';
+        document.getElementById('message').style.display = 'none';
+        document.getElementById('quote').textContent = '';
+        document.getElementById('envelope').style.display = 'block';
+        document.getElementById('envelope').onclick = () => {
+          document.getElementById('letterBox').style.display = 'block';
+        };
+      }
+    }
+
+    function continueToLove() {
+      nextStep();
+    }
+
+    function closeLetter() {
+      document.getElementById('letterBox').style.display = 'none';
+      document.getElementById('envelope').style.display = 'none';
+      document.getElementById('finalMessage').textContent = 'HAPPY 10TH MONTHSARY, MY LOVE!';
+      document.getElementById('finalMessage').style.display = 'block';
+    }
+
+    resize();
+    createStars();
+    animate();
+    setInterval(launchComet, 10000);
+    window.onresize = () => {
+      resize();
+      createStars();
+    };
+  </script>
+</body>
+</html>
